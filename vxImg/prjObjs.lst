@@ -1,0 +1,6 @@
+sysALib.o
+sysLib.o
+usrAppInit.o
+usrRtpAppInit.o
+prjConfig.o
+linkSyms.o
