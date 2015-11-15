@@ -1,2 +1,0 @@
-linkSyms.o: ../linkSyms.c
-

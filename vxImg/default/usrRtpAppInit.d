@@ -1,2 +1,0 @@
-usrRtpAppInit.o:  ../usrRtpAppInit.c
-
