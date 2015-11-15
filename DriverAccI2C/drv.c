@@ -40,7 +40,7 @@ typedef struct
 
 void ITI2C(axeDevHdr * axePtr)
 {
-	*I2C3_I2SR = 0;					//clear the IIF bit
+	*I2C3_I2SR = 0;						//clear the IIF bit
 	semGive(axePtr->I2Csynch);
 }
 
@@ -48,11 +48,11 @@ void ITI2C(axeDevHdr * axePtr)
 int axeOpen(axeDevHdr * axePtr, char * name, int mode)
 {
 	*I2C3_I2CR = 0xC0;					//IEN et IIen set to 1
-	while ((*I2C3_I2SR & 0x20) == 0x20);//attente de IBB à 0
+	while ((*I2C3_I2SR & 0x20) == 0x20);			//attente de IBB à 0
 	*I2C3_I2CR = 0xF0;					//MSTA et MTX à 1
-	while ((*I2C3_I2SR & 0x20) == 0);	//attente de IBB à 1
+	while ((*I2C3_I2SR & 0x20) == 0);			//attente de IBB à 1
 	*I2C3_I2DR = 0x32;					//écriture dans DR de 50 (SAD + W)
-	semTake(axePtr->I2Csynch, WAIT_FOREVER);  // (SAK)
+	semTake(axePtr->I2Csynch, WAIT_FOREVER);  		// (SAK)
 	*I2C3_I2DR = 0x20;					//ecriture de 32  (SUB)
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);
 	
@@ -61,7 +61,7 @@ int axeOpen(axeDevHdr * axePtr, char * name, int mode)
 
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);
 	*I2C3_I2CR = 0xC0;					//MSTA et MTX à 0
-	while ((*I2C3_I2SR & 0x20) == 0x20);//attente de IBB à 0
+	while ((*I2C3_I2SR & 0x20) == 0x20);			//attente de IBB à 0
 	
 	switch(*name){
 			case 'X': 	axePtr->mode = X;
@@ -89,7 +89,7 @@ int axeRead(axeDevHdr * axePtr, char * destPtr, int nbrOctetsMax)
 	*I2C3_I2CR = 0xF0;					//IEN, IIEN MSTA et MTX à 1
 	while ((*I2C3_I2SR & 0x20) == 0);
 	*I2C3_I2DR = 0x32;					//50
-	semTake(axePtr->I2Csynch, WAIT_FOREVER);	//wait for end of I2C cycle
+	semTake(axePtr->I2Csynch, WAIT_FOREVER);		//wait for end of I2C cycle
 	
 	
 	switch(axePtr->mode)
