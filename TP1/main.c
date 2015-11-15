@@ -41,15 +41,15 @@ void init(void)
 		printf("Erreur intEnable\n");
 		taskDelete(0);
 	}
-	//initialisation de l'accéléro
+	//initialisation de l'accÃ©lÃ©ro
 	//axe Z
 	accD = open("/axeX", O_RDONLY, 0);
 	if (accD == -1) {printf("error on open\n"); return;}
 	else printf("InitAcc OK\n");
 	
-	//initialisation du port série 2
+	//initialisation du port sÃ©rie 2
 	// 9600baud
-	//8bits de donée
+	//8bits de donÃ©e
 	//1 bit de stop
 	//pas de controle
 	
@@ -60,7 +60,7 @@ void init(void)
 	return;}
 }
 
-void GPT(void)
+void main(void)
 {
 	char bufferX [10], bufferY [10], bufferZ [10], buffer[1000];
 	float varX, varY, varZ;
