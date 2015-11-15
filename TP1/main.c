@@ -1,10 +1,8 @@
 /* * * * * * * * *   TP1/main.c    * * * * * * * * * *\
    This is the test program we used for the driver
         It read the values from each axis
-    and sends them tu the UART port at 115200 baud
+    and sends them to the UART port at 115200 baud
 \* * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-
 
 #include <stdio.h>
 #include <string.h>
