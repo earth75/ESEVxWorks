@@ -1,3 +1,8 @@
+/* * * * * * * * *   src1/main.c   * * * * * * * * * *\
+       This is the exec from the 2nd question
+\* * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
 #include <stdio.h>
 #include <taskLib.h>
 #include <semLib.h>
@@ -14,13 +19,13 @@ void Tcreee(void)
 	
 	taskID2 = taskSpawn("tache2", 100, 0 , 5000, (FUNCPTR)&tache2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		if (taskID2!=ERROR)
-			printf("Tache2 créée\n");
+			printf("Tache2 crÃ©Ã©e\n");
 		else
 			printf("ERREUR2\n");
 		
 	taskID1 = taskSpawn("tache1", 101, 0 , 5000, (FUNCPTR)&tache1, tdodo, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	if (taskID1!=ERROR)
-		printf("Tache1 créée\n");
+		printf("Tache1 crÃ©Ã©e\n");
 	else
 		printf("ERREUR1\n");
 	
