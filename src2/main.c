@@ -32,6 +32,7 @@ void init(void)
 	else
 		printf("ERREUR\n");
 
+	// initialization of the GPT
 	*GPT_IR = 0x1;
 	*GPT_CR = 0x1c3;
 	*GPT_PR = 0x0;
