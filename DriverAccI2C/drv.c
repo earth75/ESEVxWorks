@@ -1,13 +1,16 @@
 /* * * * * * * * * CriverAccI2C.c  * * * * * * * * * *\
   This is the VxWorks driver for the I2C Accelerometer
     The device supports one-at-a-time axes reading
-                 ***Reading***
+                  *** Reading ***
 The provided buffer is updated with the raw 16 bit value
 The number of byte read from the device (2) is returned
-              ***Axis selection***
+              *** Axis selection ***
        The axis selection is done with IOCTL
       Just provide 'X', 'Y' or 'Z' as argument
        The active axis can be changes anytime
+                 *** Comments ***
+        Writing, deleting and closing device
+          is not supported at the moment
 \* * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <vxWorks.h>
