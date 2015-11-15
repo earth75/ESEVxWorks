@@ -1,3 +1,12 @@
+/* * * * * * * * *  partie 1-3.c   * * * * * * * * * *\
+  	     This is the 1-3 exec file.
+    A task increments two counters at the same time
+    Another task prints the value of the counters
+     In order to avoid desynch between the two
+ a mutex is use to set a critical section, preventing
+    printing task to disrupt the incrementation
+\* * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <vxWorks.h>
 #include <stdio.h>
 #include <taskLib.h>
@@ -20,11 +29,11 @@ void codeTache1 (void)
 {
 	while (TRUE)
 	{
-		semTake(mut, WAIT_FOREVER);
+		semTake(mut, WAIT_FOREVER); 	//Start of critical area
 		var1=compteur;
 		var2=compteur;
 		compteur++;
-		semGive(mut);
+		semGive(mut);			//End of critical area
     }
 }
 
@@ -66,9 +75,9 @@ tache1ID = taskSpawn(NOM_TACHE1,              	/* nom de la tache               
                      priorite+deltaPriorite1, 	/* priorite                       */
                      optionsTache,            	/* options                        */
                      taillePile,              	/* taille de la pile en octets
-                                                 (y compris le nom de la tache) */
+                                                (y compris le nom de la tache) */
                      (FUNCPTR) &codeTache1,    	/* point d'entree                 */
-                     0,                  		/* 1er argument non utilise  */
+                     0,                  	/* 1er argument non utilise  */
                      0,0,0,0,0,0,0,0,0);      	/* 9 arguments non utilises       */ 
 
 printf("Tache 1 creee - TID = %d\n", tache1ID);
@@ -79,9 +88,9 @@ tache2ID = taskSpawn(NOM_TACHE2,              	/* nom de la tache               
                      priorite+deltaPriorite2, 	/* priorite                       */
                      optionsTache,            	/* options                        */
                      taillePile,              	/* taille de la pile en octets
-                                                 (y compris le nom de la tache) */
+                                                (y compris le nom de la tache) */
                      (FUNCPTR) &codeTache2,    	/* point d'entree                 */
-                     0,                  		/* 1er argumentnon utilisee  */
+                     0,                  	/* 1er argument non utilise  */
                      0,0,0,0,0,0,0,0,0);      	/* 9 arguments non utilises       */ 
 
 printf("Tache 2 creee - TID = %d\n", tache2ID);
