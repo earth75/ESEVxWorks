@@ -1,5 +1,7 @@
 /* * * * * * * * *   src1/main.c   * * * * * * * * * *\
        This is the exec from the 2nd question
+        Tache2 waits for Tache1 with a sem
+  Tache1 gives the sem and then delays itself for 1s
 \* * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
