@@ -21,18 +21,25 @@ void Tcreee(void)
 	
 	taskID2 = taskSpawn("tache2", 100, 0 , 5000, (FUNCPTR)&tache2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 		if (taskID2!=ERROR)
-			printf("Tache2 créée\n");
+			printf("Tache2 creee\n");
 		else
 			printf("ERREUR2\n");
 		
 	taskID1 = taskSpawn("tache1", 101, 0 , 5000, (FUNCPTR)&tache1, tdodo, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	if (taskID1!=ERROR)
-		printf("Tache1 créée\n");
+		printf("Tache1 creee\n");
 	else
 		printf("ERREUR1\n");
 	
 	taskDelete(0);
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * *\
+  tache2 (100) has higher priority than tache1 (101)
+      When the semaphore is created, it is full
+  In that case, when the semaphore is given by tache1, tache2 takes it and prints "DODO2\n": there is preemption; then tache1 takes back control.
+  When tache1 has the highest priority though, after giving the semaphore, it prints "DODO1\n", delays itself then the scheduler hands over control to tache2.
+\* * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 void tache2(void)
 {

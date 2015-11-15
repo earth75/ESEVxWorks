@@ -3,7 +3,7 @@
     A task increments two counters at the same time
     Another task prints the value of the counters
      In order to avoid desynch between the two
- a mutex is use to set a critical section, preventing
+ a mutex is used to set a critical section, preventing
     printing task to disrupt the incrementation
 \* * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -17,7 +17,7 @@
 #define NOM_TACHE2 "t2"
 
 #define deltaPriorite1 +2 
-#define deltaPriorite2 +1 //tache 1 prioritaire
+#define deltaPriorite2 +1            //tache1 has higher priority than tache2
 #define taillePile 1000
 #define optionsTache 0
 
@@ -41,62 +41,64 @@ void codeTache2 (void)
 {
 	while (TRUE)
     {
-		semTake(mut, WAIT_FOREVER);
+		semTake(mut, WAIT_FOREVER);	//Start
 		if (!(var1==var2)) {
 		taskDelay(1);
-		semGive(mut);
+		semGive(mut);			//End
 		printf("var1 = %d  var2=%d\n",var1,var2);
 		}
-		else semGive(mut);
+		else semGive(mut);		//End
     }
 }
 
 /*-----------------------------------------------------------------------------
- Code de la tache initiale
+ 			Initial task's code
 -----------------------------------------------------------------------------*/
+
 void init (void)
 {
 int tache1ID, tache2ID, priorite;
 mut = semMCreate(SEM_Q_PRIORITY, SEM_FULL);
-/* initialisation des variables globales */
+/* initialisation of global variables */
 var1=0;
 var2=0;
 compteur=0;
 
-/* Recherche de la priorite de la tache courante
-   Pas de test d'erreur (TID forcement valide)
+/* Search the priority of the current task
+   No error test (TID necessarily valid)
 ----------------------------------------------*/
-taskPriorityGet (MOI,        	/* task ID                       */
-                 &priorite); 	/* priorite de la tache courante */
+taskPriorityGet (MOI,        	/* task ID                 */
+                 &priorite); 	/* current task's priority */
 
-/* Creation de la premiere tache
+/* First task's creation
 ------------------------------*/
-tache1ID = taskSpawn(NOM_TACHE1,              	/* nom de la tache                */
-                     priorite+deltaPriorite1, 	/* priorite                       */
-                     optionsTache,            	/* options                        */
-                     taillePile,              	/* taille de la pile en octets
-                                                (y compris le nom de la tache) */
-                     (FUNCPTR) &codeTache1,    	/* point d'entree                 */
-                     0,                  	/* 1er argument non utilise  */
-                     0,0,0,0,0,0,0,0,0);      	/* 9 arguments non utilises       */ 
+tache1ID = taskSpawn(NOM_TACHE1,              	/* name of the task		*/
+                     priorite+deltaPriorite1, 	/* priority			*/
+                     optionsTache,            	/* options			*/
+                     taillePile,              	/* stack's size in bytes
+                                                (including task's name)		*/
+                     (FUNCPTR) &codeTache1,    	/* entry point			*/
+                     0,                  	/* first argument unused	*/
+                     0,0,0,0,0,0,0,0,0);      	/* 9 arguments unused		*/ 
 
 printf("Tache 1 creee - TID = %d\n", tache1ID);
 
-/* Creation de la seconde tache
+/* Second task's creation
 -----------------------------*/
-tache2ID = taskSpawn(NOM_TACHE2,              	/* nom de la tache                */
-                     priorite+deltaPriorite2, 	/* priorite                       */
-                     optionsTache,            	/* options                        */
-                     taillePile,              	/* taille de la pile en octets
-                                                (y compris le nom de la tache) */
-                     (FUNCPTR) &codeTache2,    	/* point d'entree                 */
-                     0,                  	/* 1er argument non utilise  */
-                     0,0,0,0,0,0,0,0,0);      	/* 9 arguments non utilises       */ 
+
+tache2ID = taskSpawn(NOM_TACHE2,              	/* name of the task             */
+                     priorite+deltaPriorite2, 	/* priority               	*/
+                     optionsTache,            	/* options                      */
+                     taillePile,              	/* task's size in bytes
+                                                (including task's name) 	*/
+                     (FUNCPTR) &codeTache2,    	/* entry point                 	*/
+                     0,                  	/* first argument unused 	*/
+                     0,0,0,0,0,0,0,0,0);      	/* 9 arguments unused		*/ 
 
 printf("Tache 2 creee - TID = %d\n", tache2ID);
 
-/* destruction de la tache d'initialisation */
+/* deletion of the initial task init() */
 taskDelete (MOI);
 
-} /* fin de tacheInit() */
+}
 
