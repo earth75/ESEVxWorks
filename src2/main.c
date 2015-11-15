@@ -65,7 +65,7 @@ void init(void)
 void ITserver(void)
 {
 	cpt++;
-	*GPT_SR = 0x0001;
+	*GPT_SR = 0x0001;		//setting the status register to avoid being stuck in the interrupt handler
 	msgQSend(mailBox, (char*)&cpt, sizeof(cpt), NO_WAIT, MSG_PRI_NORMAL);
 }
 
