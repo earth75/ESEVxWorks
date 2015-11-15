@@ -1,3 +1,15 @@
+/* * * * * * * * * CriverAccI2C.c  * * * * * * * * * *\
+  This is the VxWorks driver for the I2C Accelerometer
+    The device supports one-at-a-time axes reading
+                 ***Reading***
+The provided buffer is updated with the raw 16 bit value
+The number of byte read from the device (2) is returned
+              ***Axis selection***
+       The axis selection is done with IOCTL
+      Just provide 'X', 'Y' or 'Z' as argument
+       The active axis can be changes anytime
+\* * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <vxWorks.h>
 #include <ioLib.h>
 #include <iosLib.h>
@@ -19,7 +31,7 @@ typedef struct
   DEV_HDR devHdr;
   SEM_ID I2Csynch;
   SEM_ID AccessLock;
-  axe mode; //[X, Y, Z]
+  axe mode; //holds the active axis
 } axeDevHdr;
 
 
@@ -33,10 +45,10 @@ void ITI2C(axeDevHdr * axePtr)
 int axeOpen(axeDevHdr * axePtr, char * name, int mode)
 {
 	*I2C3_I2CR = 0xC0;					//IEN et IIen set to 1
-	while ((*I2C3_I2SR & 0x20) == 0x20);//attente de IBB à 0
-	*I2C3_I2CR = 0xF0;					//MSTA et MTX à 1
-	while ((*I2C3_I2SR & 0x20) == 0);	//attente de IBB à 1
-	*I2C3_I2DR = 0x32;					//écriture dans DR de 50 (SAD + W)
+	while ((*I2C3_I2SR & 0x20) == 0x20);//attente de IBB Ã  0
+	*I2C3_I2CR = 0xF0;					//MSTA et MTX Ã  1
+	while ((*I2C3_I2SR & 0x20) == 0);	//attente de IBB Ã  1
+	*I2C3_I2DR = 0x32;					//Ã©criture dans DR de 50 (SAD + W)
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);  // (SAK)
 	*I2C3_I2DR = 0x20;					//ecriture de 32  (SUB)
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);
@@ -45,8 +57,8 @@ int axeOpen(axeDevHdr * axePtr, char * name, int mode)
 	*I2C3_I2DR = 0x57;	
 
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);
-	*I2C3_I2CR = 0xC0;					//MSTA et MTX à 0
-	while ((*I2C3_I2SR & 0x20) == 0x20);//attente de IBB à 0
+	*I2C3_I2CR = 0xC0;					//MSTA et MTX Ã  0
+	while ((*I2C3_I2SR & 0x20) == 0x20);//attente de IBB Ã  0
 	
 	switch(*name){
 			case 'X': 	axePtr->mode = X;
@@ -71,7 +83,7 @@ int axeRead(axeDevHdr * axePtr, char * destPtr, int nbrOctetsMax)
 	char val1,val2,val3;
 	semTake(axePtr->AccessLock, WAIT_FOREVER);
 	
-	*I2C3_I2CR = 0xF0;					//IEN, IIEN MSTA et MTX à 1
+	*I2C3_I2CR = 0xF0;					//IEN, IIEN MSTA et MTX Ã  1
 	while ((*I2C3_I2SR & 0x20) == 0);
 	*I2C3_I2DR = 0x32;					//50
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);	//wait for end of I2C cycle
@@ -98,13 +110,13 @@ int axeRead(axeDevHdr * axePtr, char * destPtr, int nbrOctetsMax)
 	*I2C3_I2CR = 0xF4;					//RSTA a 1
 	*I2C3_I2DR = 0x33;					//51
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);
-	*I2C3_I2CR = 0xE0;					//MTX et RSTA à 0
-	val1=*I2C3_I2DR;					// lecture de DR qui sert à lancer le transfert
+	*I2C3_I2CR = 0xE0;					//MTX et RSTA Ã  0
+	val1=*I2C3_I2DR;					// lecture de DR qui sert Ã  lancer le transfert
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);
-	*I2C3_I2CR = 0xE8;					//TXAK à 1
+	*I2C3_I2CR = 0xE8;					//TXAK Ã  1
 	val2=*I2C3_I2DR;
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);
-	*I2C3_I2CR = 0xC0;					//IEN et IIEN à 1 (le reste à 0)
+	*I2C3_I2CR = 0xC0;					//IEN et IIEN Ã  1 (le reste Ã  0)
 	while ((*I2C3_I2SR & 0x20) == 0x20);
 	val3=*I2C3_I2DR;
 	sprintf(destPtr,"%d", (short)((val3<<8)+val2)); 
@@ -131,6 +143,13 @@ int axeIoctl(axeDevHdr * axePtr, int fonction, int arg)
 	
 	return OK;
 }
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
+           This is the initialization function
+      It handles dynamic HDR and I2C initialization
+ Is uses a semaphore and the I2C IT channel for I2C synch.
+\* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 int initDriver(void)
 {
