@@ -9,7 +9,7 @@ The number of byte read from the device (2) is returned
       Just provide 'X', 'Y' or 'Z' as argument
        The active axis can be changes anytime
                  *** Comments ***
-        Writing, deleting and closing device
+   Writing, deleting, creating and closing device
           is not supported at the moment
 \* * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -34,7 +34,7 @@ typedef struct
   DEV_HDR devHdr;
   SEM_ID I2Csynch;
   SEM_ID AccessLock;
-  axe mode; //holds the active axis
+  axe mode; 		//holds the active axis
 } axeDevHdr;
 
 
@@ -44,24 +44,24 @@ void ITI2C(axeDevHdr * axePtr)
 	semGive(axePtr->I2Csynch);
 }
 
-// fonctions du driver
+// Driver's functions
 int axeOpen(axeDevHdr * axePtr, char * name, int mode)
 {
 	*I2C3_I2CR = 0xC0;					//IEN et IIen set to 1
-	while ((*I2C3_I2SR & 0x20) == 0x20);			//attente de IBB à 0
-	*I2C3_I2CR = 0xF0;					//MSTA et MTX à 1
-	while ((*I2C3_I2SR & 0x20) == 0);			//attente de IBB à 1
-	*I2C3_I2DR = 0x32;					//écriture dans DR de 50 (SAD + W)
+	while ((*I2C3_I2SR & 0x20) == 0x20);			//pending IBB = 0
+	*I2C3_I2CR = 0xF0;					//MSTA and MTX = 1
+	while ((*I2C3_I2SR & 0x20) == 0);			//pending IBB = 1
+	*I2C3_I2DR = 0x32;					//writing in DR if 50 (SAD + W)
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);  		// (SAK)
-	*I2C3_I2DR = 0x20;					//ecriture de 32  (SUB)
+	*I2C3_I2DR = 0x20;					//writing 32  (SUB)
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);
 	
-	//Autorisation de tous les axes
+	//Autorization of all axes
 	*I2C3_I2DR = 0x57;	
 
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);
-	*I2C3_I2CR = 0xC0;					//MSTA et MTX à 0
-	while ((*I2C3_I2SR & 0x20) == 0x20);			//attente de IBB à 0
+	*I2C3_I2CR = 0xC0;					//MSTA and MTX�= 0
+	while ((*I2C3_I2SR & 0x20) == 0x20);			//pending IBB = 0
 	
 	switch(*name){
 			case 'X': 	axePtr->mode = X;
@@ -76,17 +76,12 @@ int axeOpen(axeDevHdr * axePtr, char * name, int mode)
 	return (int)axePtr;
 }
 
-int axeClose(axeDevHdr * axePtr)
-{
-	return OK;
-}
-
 int axeRead(axeDevHdr * axePtr, char * destPtr, int nbrOctetsMax)
 {
 	char val1,val2,val3;
 	semTake(axePtr->AccessLock, WAIT_FOREVER);
 	
-	*I2C3_I2CR = 0xF0;					//IEN, IIEN MSTA et MTX à 1
+	*I2C3_I2CR = 0xF0;					//IEN, IIEN, MSTA and MTX = 1
 	while ((*I2C3_I2SR & 0x20) == 0);
 	*I2C3_I2DR = 0x32;					//50
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);		//wait for end of I2C cycle
@@ -110,26 +105,21 @@ int axeRead(axeDevHdr * axePtr, char * destPtr, int nbrOctetsMax)
 	}
 	
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);
-	*I2C3_I2CR = 0xF4;					//RSTA a 1
+	*I2C3_I2CR = 0xF4;					//RSTA = 1
 	*I2C3_I2DR = 0x33;					//51
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);
-	*I2C3_I2CR = 0xE0;					//MTX et RSTA à 0
-	val1=*I2C3_I2DR;					// lecture de DR qui sert à lancer le transfert
+	*I2C3_I2CR = 0xE0;					//MTX and RSTA = 0
+	val1=*I2C3_I2DR;					//reading DR to start transferring
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);
-	*I2C3_I2CR = 0xE8;					//TXAK à 1
+	*I2C3_I2CR = 0xE8;					//TXAK = 1
 	val2=*I2C3_I2DR;
 	semTake(axePtr->I2Csynch, WAIT_FOREVER);
-	*I2C3_I2CR = 0xC0;					//IEN et IIEN à 1 (le reste à 0)
+	*I2C3_I2CR = 0xC0;					//IEN and IIEN = 1 (the rest�= 0)
 	while ((*I2C3_I2SR & 0x20) == 0x20);
 	val3=*I2C3_I2DR;
 	sprintf(destPtr,"%d", (short)((val3<<8)+val2)); 
 	semGive(axePtr->AccessLock);
 	return 2;
-}
-
-int axeWrite(axeDevHdr * axePtr, char * buffer, int nbrOctets)
-{ 
-	return ERROR;
 }
 
 int axeIoctl(axeDevHdr * axePtr, int fonction, int arg)
@@ -147,11 +137,29 @@ int axeIoctl(axeDevHdr * axePtr, int fonction, int arg)
 	return OK;
 }
 
+int axeWrite(axeDevHdr * axePtr, char * buffer, int nbrOctets)
+{
+	return ERROR;
+}
 
+int axeDelete(axeDevHdr * axePtr)
+{
+        return ERROR;
+}
+
+int axeClose(axeDevHdr * axePtr)
+{
+        return ERROR;
+}
+
+int axeCreate(axeDevHdr * axePtr)
+{
+        return ERROR;
+}
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * *\
            This is the initialization function
       It handles dynamic HDR and I2C initialization
- Is uses a semaphore and the I2C IT channel for I2C synch.
+ It uses a semaphore and the I2C IT channel for I2C synch.
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 int initDriver(void)
@@ -182,7 +190,7 @@ int initDriver(void)
 		taskDelete(0);
 	}
 
-	numDriver=iosDrvInstall(NULL, (FUNCPTR)axeClose, (FUNCPTR)axeOpen, (FUNCPTR)axeClose, (FUNCPTR)axeRead, NULL, (FUNCPTR)axeIoctl);
+	numDriver=iosDrvInstall((FUNCPTR)axeCreate, (FUNCPTR)axeDelete, (FUNCPTR)axeOpen, (FUNCPTR)axeClose, (FUNCPTR)axeRead, (FUNCPTR)axeWrite, (FUNCPTR)axeIoctl);
 	if (numDriver==ERROR) printf("Erreur installation driver\n");
 	
 	erreur=iosDevAdd(axePtr, "/axe", numDriver);

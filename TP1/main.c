@@ -10,7 +10,6 @@
 #include <semLib.h>
 #include <iolib.h>
 #include "adresses.h"
-//#include <msgQLib.h>
 
 STATUS erreur;
 void ITtimer(void);
@@ -47,18 +46,18 @@ void init(void)
 		taskDelete(0);
 	}
 	
-	//initialisation de l'accéléro
-	//le nom est /axeX pour ouvrir l'axe X par défaut
-	//toute combinaison est acceptée, mais "/axe" est déconseillée
+	//initialising the accelerometer
+	//using /axeX by default to open X axis
+	//any combination is acceptable, but "/axe" isn't recommended
 	accD = open("/axeX", O_RDONLY, 0);
 	if (accD == -1) {printf("error on open\n"); return;}
 	else printf("InitAcc OK\n");
 	
-	//initialisation du port série 2
+	//initializing serial port 2
 	  // 115200 baud
- 	  // 8bits de donée
-	  // 1 bit de stop
-	  // pas de controle
+ 	  // 8bits of data
+	  // 1 stop bit
+	  // no control
 	fd = open("/tyCo/1", O_RDWR, 0x777);
 	if (fd == -1) {printf("error on open\n"); return;}
 	else {ioctl(fd, FIOBAUDRATE, 115200);
@@ -84,11 +83,11 @@ void main(void)
 		ioctl(accD, 0, 'Z');				//select Z
 		read(accD, bufferZ, 10);			//read and store Z
 		varX = (float) atoi(bufferX);
-		sprintf(bufferX,"%1.*f",precision, varX/16384);	//precision = nb de chiffres apres la virgule
+		sprintf(bufferX,"%1.*f",precision, varX/16384);	//precision = number of digits after the decimal point
 		varY = (float) atoi(bufferY);
-		sprintf(bufferY,"%1.*f",precision, varY/16384);	//precision = nb de chiffres apres la virgule
+		sprintf(bufferY,"%1.*f",precision, varY/16384);	//precision = number of digits after the decimal point
 		varZ = (float) atoi(bufferZ);
-		sprintf(bufferZ,"%1.*f",precision, varZ/16384);	//precision = nb de chiffres apres la virgule
+		sprintf(bufferZ,"%1.*f",precision, varZ/16384);	//precision = number of digits after the decimal point
 		strcpy(buffer, "(");
 		strcat(buffer, bufferX);
 		strcat(buffer, ", ");
